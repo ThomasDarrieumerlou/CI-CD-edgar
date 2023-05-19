@@ -1,6 +1,6 @@
 ---
 title: Someone just pushed
-assignees: JasonEtco, matchai
+assignees: ThomasDarrieumerlou
 labels: bug, enhancement
 ---
 
