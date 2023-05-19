@@ -1,0 +1,35 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI creation issue
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get today's date
+        id: date
+        run: |
+          echo "::set-output name=today::$(date "+%Y/%m/%d")"
+
+      - name: Create an issue
+        uses: actions-ecosystem/action-create-issue@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          title: ${{ steps.date.outputs.today }}
+          body: |
+            ## This an report 
+
+            - [ ] Check Github action on failure
+            - [ ] Repare the problems
+
+          labels: |
+            bug
