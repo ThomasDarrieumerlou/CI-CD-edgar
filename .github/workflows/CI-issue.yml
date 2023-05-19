@@ -18,19 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Something that might fail
-        run: exit 1
-      - name: Create Issue on Failed workflow
-        if: ${{ failure() }}
+      - name: create an issue
         uses: dacbd/create-issue-action@main
         with:
           token: ${{ github.token }}
-          title: Action workflow failed.
-          body: |
-            ### Context
-            [Failed Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            [Codebase](https://github.com/${{ github.repository }}/tree/${{ github.sha }})
-            Workflow name - `${{ github.workflow }}`
-            Job -           `${{ github.job }}`
-            status -        `${{ job.status }}`
-          assignees: ThomasDarrieumerlou
+          title: Simple test issue
+          body: my new issue
