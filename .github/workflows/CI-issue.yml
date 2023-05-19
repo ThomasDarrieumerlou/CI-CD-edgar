@@ -22,12 +22,3 @@ jobs:
       - uses: JasonEtco/create-an-issue@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          title: Bug on github action
-          body: |
-            ## This an report 
-
-            - [ ] Check Github action on failure
-            - [ ] Repare the problems
-
-          labels: |
-            bug
