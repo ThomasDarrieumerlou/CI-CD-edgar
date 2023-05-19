@@ -5,7 +5,7 @@ name: CI build GlaDOS project
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
+  pull_request:
     branches:
       - main
       - dev
@@ -30,13 +30,13 @@ jobs:
       - name: Compile project GlaDOS
         run: make build
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: glados-exes
-          path: glados
-      - name: tree function
-        run: tree
+#       - name: Upload artifacts
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: haskell.exe
+#           path: haskell
+#       - name: tree function
+#         run: tree
 
   test:
     # The type of runner that the job will run on
@@ -69,16 +69,16 @@ jobs:
       - name: look repo
         run: ls -la
 
-  release:
-    needs: test
-    name: Create release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: glados-exes
+#   release:
+#     needs: test
+#     name: Create release
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#       - uses: actions/download-artifact@v3
+#         with:
+#           name: haskell.exe
 
 
 ##################################################################################################################
@@ -96,7 +96,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE }}
         with:
           tag_name: V.0.${{ github.run_number }}
-          release_name: GlaDOS Release MAIN ${{ github.run_number }}
+          release_name: Haskell Release MAIN ${{ github.run_number }}
           draft: false
           prerelease: false
 
@@ -107,7 +107,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE }}
         with:
           tag_name: V.0.${{ github.run_number }}
-          release_name: GlaDOS Release DEV ${{ github.run_number }}
+          release_name: Haskell Release DEV ${{ github.run_number }}
           draft: false
           prerelease: false
 
@@ -125,8 +125,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./glados
-          asset_name: glados
+          asset_path: ./haskell
+          asset_name: haskell
           asset_content_type: application/octet-stream
       
       #- name: test coverage
@@ -155,8 +155,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE }}
         with:
           upload_url: ${{ steps.create_release_dev.outputs.upload_url }}
-          asset_path: ./glados
-          asset_name: glados
+          asset_path: ./haskell
+          asset_name: haskell
           asset_content_type: application/octet-stream
       
       #- name: test coverage
