@@ -11,20 +11,18 @@ on:
     branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
+permissions:
+  contents: read
+  issues: write 
 jobs:
-  create_issue:
+  stuff:
     runs-on: ubuntu-latest
     steps:
-      - name: Get today's date
-        id: date
-        run: |
-          echo "::set-output name=today::$(date "+%Y/%m/%d")"
-
-      - name: Create an issue
-        uses: actions-ecosystem/action-create-issue@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          title: ${{ steps.date.outputs.today }}
+      - uses: actions/checkout@v3
+      - uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          title: Bug on github action
           body: |
             ## This an report 
 
