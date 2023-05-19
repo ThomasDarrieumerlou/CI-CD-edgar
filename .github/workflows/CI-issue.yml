@@ -33,4 +33,4 @@ jobs:
             Workflow name - `${{ github.workflow }}`
             Job -           `${{ github.job }}`
             status -        `${{ job.status }}`
-          assignees: SomeUsername,AnotherUsername
+          assignees: ThomasDarrieumerlou
