@@ -11,16 +11,15 @@ on:
     branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
-permissions:
-  contents: read
-  issues: write 
+  issues:
+    types: [opened]
+
 jobs:
-  stuff:
+  add-issue:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: JasonEtco/create-an-issue@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          filename: .github/issue.md
+    - uses: actions/checkout@v2
+    - name: Add Issue
+      run: |
+        echo "Adding issue to repository..."
+        cat ISSUE_TEMPLATE.md >> $GITHUB_EVENT_PATH
