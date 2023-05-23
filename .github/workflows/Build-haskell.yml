@@ -1,239 +1,191 @@
-name: Haskell Build and Test
 
+# This is a basic workflow to help you get started with Actions
+
+name: CI build Haskell part
+
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
+      - dev
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
+  build-project:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+      
+      - name: add haskel part
+        uses: haskell/actions/setup@v2
+        with:
+          ghc-version: '8.10.4'
+          enable-stack: true
+          stack-version: 'latest'
+      
+      # Run command for building project
+      - name: update
+        run: stack upgrade
+      - name: init
+        run: stack init
+      - name: Compile project
+#         run: stack test.go
+        run: stack build
+        
+      - name: Setup
+        run: stack setup
+
+#       - name: Upload artifacts
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: haskell.exe
+#           path: haskell
+#       - name: tree function
+#         run: tree
+
+  test:
+    # The type of runner that the job will run on
+    needs: build-project
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Setup Stack
-        uses: fpco/setup-stack@v2
+      # Runs test with stack
+      - name: Run test haskell with stack
+        run: stack test --coverage
+
+      #Run test functcionel for
+#       - name: Run functcionel test
+#         run: make func_tests
+      - name: Create Issue on Failed workflow
+        if: ${{ failure() }}
+        uses: dacbd/create-issue-action@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}
         with:
-          stack-version: 2.7.3
+          token: ${{ github.token }}
+          title: Simple test issue
+          body: my new issue
 
-      - name: Build
-        run: stack build --system-ghc
+      - name: Upload test coverage in artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-test
+          path: .stack-work/install/x86_64-linux-tinfo6/affb732a1df2f664495cea45ecb2a0ec6436312d5a18525de491e4a4c00d0a4f/9.2.5/hpc/*
+      
+      - name: create repo
+        run: mkdir coverage-test
+      
+      - name: copy coverage
+        run: cp .stack-work/install/x86_64-linux-tinfo6/affb732a1df2f664495cea45ecb2a0ec6436312d5a18525de491e4a4c00d0a4f/9.2.5/hpc/* ./coverage-test -r
+      
+      - name: look repo
+        run: ls -la
 
-      - name: Run Unit Tests
-        run: stack test --system-ghc
-
-      - name: Run Functional Tests
-        run: stack test --system-ghc --test-arguments="--color always"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # This is a basic workflow to help you get started with Actions
-
-# name: CI build Haskell part
-
-# # Controls when the workflow will run
-# on:
-#   # Triggers the workflow on push or pull request events but only for the "main" branch
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
-#       - dev
-
-# # A workflow run is made up of one or more jobs that can run sequentially or in parallel
-# jobs:
-#   build-project:
+#   release:
+#     needs: test
+#     name: Create release
 #     runs-on: ubuntu-latest
-    
 #     steps:
-#       - name: checkout repo
+#       - name: Checkout code
 #         uses: actions/checkout@v3
-      
-#       - name: add haskel part
-#         uses: haskell/actions/setup@v2
+#       - uses: actions/download-artifact@v3
 #         with:
-#           ghc-version: '8.8.4'
-#           enable-stack: true
-#           stack-version: 'latest'
+#           name: haskell.exe
+
+
+##################################################################################################################
+#
+#                             release for main part and dev depend of condition
+#
+##################################################################################################################
+
+
+      - name: Create release main
+        if: github.ref == 'refs/heads/main'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}
+        with:
+          tag_name: V.0.${{ github.run_number }}
+          release_name: Haskell Release MAIN ${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Create release dev
+        id: create_release_dev
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}
+        with:
+          tag_name: V.0.${{ github.run_number }}
+          release_name: Haskell Release DEV ${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+##################################################################################################################
+#
+#                             Custom release for main part
+#
+##################################################################################################################
+
+      - name: Custom release main
+        if: github.ref == 'refs/heads/main'
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./haskell
+          asset_name: haskell
+          asset_content_type: application/octet-stream
       
-#       # Run command for building project
-#       - name: update
-#         run: stack upgrade
-#       - name: generate template
-#         run: stack new
-#       - name: init
-#         run: stack init
-#       - name: Compile project
-# #         run: stack test.go
-#         run: stack build
-        
-#       - name: Setup
-#         run: stack setup
+      #- name: test coverage
+      #  if: github.ref == 'refs/heads/main'
+      #  uses: actions/upload-release-asset@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.RELEASE }}
+      #  with:
+      #    upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #    asset_path:
+      #    asset_name: coverge.html
+      #    asset_content_type: application/.html
 
-# #       - name: Upload artifacts
-# #         uses: actions/upload-artifact@v3
-# #         with:
-# #           name: haskell.exe
-# #           path: haskell
-# #       - name: tree function
-# #         run: tree
 
-#   test:
-#     # The type of runner that the job will run on
-#     needs: build-project
-#     runs-on: ubuntu-latest
 
-#     steps:
-#       - uses: actions/checkout@v3
+##################################################################################################################
+#
+#                             Custom release for dev part
+#
+##################################################################################################################
 
-#       # Runs test with stack
-#       - name: Run test haskell with stack
-#         run: stack test --coverage
-
-#       #Run test functcionel for
-# #       - name: Run functcionel test
-# #         run: make func_tests
-#       - name: Create Issue on Failed workflow
-#         if: ${{ failure() }}
-#         uses: dacbd/create-issue-action@main
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.RELEASE }}
-#         with:
-#           token: ${{ github.token }}
-#           title: Simple test issue
-#           body: my new issue
-
-#       - name: Upload test coverage in artifact
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: coverage-test
-#           path: .stack-work/install/x86_64-linux-tinfo6/affb732a1df2f664495cea45ecb2a0ec6436312d5a18525de491e4a4c00d0a4f/9.2.5/hpc/*
+      - name: Custom release dev
+        id: upload-release-asset_dev
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}
+        with:
+          upload_url: ${{ steps.create_release_dev.outputs.upload_url }}
+          asset_path: ./haskell
+          asset_name: haskell
+          asset_content_type: application/octet-stream
       
-#       - name: create repo
-#         run: mkdir coverage-test
-      
-#       - name: copy coverage
-#         run: cp .stack-work/install/x86_64-linux-tinfo6/affb732a1df2f664495cea45ecb2a0ec6436312d5a18525de491e4a4c00d0a4f/9.2.5/hpc/* ./coverage-test -r
-      
-#       - name: look repo
-#         run: ls -la
-
-# #   release:
-# #     needs: test
-# #     name: Create release
-# #     runs-on: ubuntu-latest
-# #     steps:
-# #       - name: Checkout code
-# #         uses: actions/checkout@v3
-# #       - uses: actions/download-artifact@v3
-# #         with:
-# #           name: haskell.exe
-
-
-# ##################################################################################################################
-# #
-# #                             release for main part and dev depend of condition
-# #
-# ##################################################################################################################
-
-
-#       - name: Create release main
-#         if: github.ref == 'refs/heads/main'
-#         id: create_release
-#         uses: actions/create-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.RELEASE }}
-#         with:
-#           tag_name: V.0.${{ github.run_number }}
-#           release_name: Haskell Release MAIN ${{ github.run_number }}
-#           draft: false
-#           prerelease: false
-
-#       - name: Create release dev
-#         id: create_release_dev
-#         uses: actions/create-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.RELEASE }}
-#         with:
-#           tag_name: V.0.${{ github.run_number }}
-#           release_name: Haskell Release DEV ${{ github.run_number }}
-#           draft: false
-#           prerelease: false
-
-# ##################################################################################################################
-# #
-# #                             Custom release for main part
-# #
-# ##################################################################################################################
-
-#       - name: Custom release main
-#         if: github.ref == 'refs/heads/main'
-#         id: upload-release-asset
-#         uses: actions/upload-release-asset@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.RELEASE }}
-#         with:
-#           upload_url: ${{ steps.create_release.outputs.upload_url }}
-#           asset_path: ./haskell
-#           asset_name: haskell
-#           asset_content_type: application/octet-stream
-      
-#       #- name: test coverage
-#       #  if: github.ref == 'refs/heads/main'
-#       #  uses: actions/upload-release-asset@v1
-#       #  env:
-#       #    GITHUB_TOKEN: ${{ secrets.RELEASE }}
-#       #  with:
-#       #    upload_url: ${{ steps.create_release.outputs.upload_url }}
-#       #    asset_path:
-#       #    asset_name: coverge.html
-#       #    asset_content_type: application/.html
-
-
-
-# ##################################################################################################################
-# #
-# #                             Custom release for dev part
-# #
-# ##################################################################################################################
-
-#       - name: Custom release dev
-#         id: upload-release-asset_dev
-#         uses: actions/upload-release-asset@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.RELEASE }}
-#         with:
-#           upload_url: ${{ steps.create_release_dev.outputs.upload_url }}
-#           asset_path: ./haskell
-#           asset_name: haskell
-#           asset_content_type: application/octet-stream
-      
-#       #- name: test coverage
-#       #  uses: actions/upload-release-asset@v1
-#       #  env:
-#       #    GITHUB_TOKEN: ${{ secrets.RELEASE }}
-#       #  with:
-#       #    upload_url: ${{ steps.create_release_dev.outputs.upload_url }}
-#       #    asset_path:
-#       #    asset_name: coverge.html
-#       #    asset_content_type: application/.html
+      #- name: test coverage
+      #  uses: actions/upload-release-asset@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.RELEASE }}
+      #  with:
+      #    upload_url: ${{ steps.create_release_dev.outputs.upload_url }}
+      #    asset_path:
+      #    asset_name: coverge.html
+      #    asset_content_type: application/.html
