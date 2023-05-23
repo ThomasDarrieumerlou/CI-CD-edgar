@@ -30,6 +30,8 @@ jobs:
           stack-version: 'latest'
       
       # Run command for building project
+      - name: update
+        run: stack upgrade
       - name: Compile project
 #         run: stack test.go
         run: stack build
