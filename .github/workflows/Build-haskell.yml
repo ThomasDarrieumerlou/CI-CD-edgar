@@ -28,7 +28,11 @@ jobs:
         run: stack upgrade --binary-only
       
       - name: Initialize Stack Project
-        run: stack init --resolver=ghc-8.10.4
+        run: stack init --resolver=ghc-8.10.4 --omit-packages
+      
+      - name: Generate package.yaml
+        run: cabal init --overwrite --package-name your-package-name --license MIT --author "Your Name" --email "your.email@example.com"
+    
       
       - name: Compile Project
         run: stack build
