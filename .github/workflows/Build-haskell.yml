@@ -31,8 +31,8 @@ jobs:
       
       # Run command for building project
       - name: Compile project
-        run: ghc test.go
-#         run: stack build
+#         run: stack test.go
+        run: stack build
         
       - name: Setup
         run: stack setup
