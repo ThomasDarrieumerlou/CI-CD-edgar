@@ -1,11 +1,6 @@
+name: CI Build Haskell Project
 
-# This is a basic workflow to help you get started with Actions
-
-name: CI build Haskell part
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches:
       - main
@@ -14,33 +9,33 @@ on:
       - main
       - dev
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build-project:
     runs-on: ubuntu-latest
     
     steps:
-      - name: checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
       
-      - name: add haskel part
+      - name: Setup Haskell
         uses: haskell/actions/setup@v2
         with:
           ghc-version: '8.10.4'
           enable-stack: true
           stack-version: 'latest'
       
-      # Run command for building project
-      - name: update
-        run: stack upgrade
-      - name: init
-        run: stack init
-      - name: Compile project
-#         run: stack test.go
+      - name: Update Stack
+        run: stack upgrade --binary-only
+      
+      - name: Initialize Stack Project
+        run: stack init --resolver=ghc-8.10.4
+      
+      - name: Compile Project
         run: stack build
         
-      - name: Setup
+      - name: Setup GHC
         run: stack setup
+
 
 #       - name: Upload artifacts
 #         uses: actions/upload-artifact@v3
