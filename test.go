@@ -1,44 +1,40 @@
-package main
+package sort_test
 
 import (
-    "bufio"
     "fmt"
-    "os"
+    "sort"
 )
 
-func check(e error) {
-    if e != nil {
-        panic(e)
-    }
+type Person struct {
+    Name string
+    Age  int
 }
 
-func main() {
+func (p Person) String() string {
+    return fmt.Sprintf("%s: %d", p.Name, p.Age)
+}
 
-    d1 := []byte("hello\ngo\n")
-    err := os.WriteFile("/tmp/dat1", d1, 0644)
-    check(err)
+// ByAge implements sort.Interface for []Person based on
+// the Age field.
+type ByAge []Person
 
-    f, err := os.Create("/tmp/dat2")
-    check(err)
+func (a ByAge) Len() int           { return len(a) }
+func (a ByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByAge) Less(i, j int) bool { return a[i].Age < a[j].Age }
 
-    defer f.Close()
+func Example() {
+    people := []Person{
+        {"Bob", 31},
+        {"John", 42},
+        {"Michael", 17},
+        {"Jenny", 26},
+    }
 
-    d2 := []byte{115, 111, 109, 101, 10}
-    n2, err := f.Write(d2)
-    check(err)
-    fmt.Printf("wrote %d bytes\n", n2)
+    fmt.Println(people)
+    sort.Sort(ByAge(people))
+    fmt.Println(people)
 
-    n3, err := f.WriteString("writes\n")
-    check(err)
-    fmt.Printf("wrote %d bytes\n", n3)
-
-    f.Sync()
-
-    w := bufio.NewWriter(f)
-    n4, err := w.WriteString("buffered\n")
-    check(err)
-    fmt.Printf("wrote %d bytes\n", n4)
-
-    w.Flush()
-
+    // Output:
+    // [Bob: 31 John: 42 Michael: 17 Jenny: 26]
+    // [Michael: 17 Jenny: 26 Bob: 31 John: 42]
 }
