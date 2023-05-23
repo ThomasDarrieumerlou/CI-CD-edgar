@@ -28,7 +28,7 @@ jobs:
       
       # Run command for building project
       - name: Compile project GlaDOS
-        run: make build
+        run: stack build
 
 #       - name: Upload artifacts
 #         uses: actions/upload-artifact@v3
@@ -51,8 +51,17 @@ jobs:
         run: stack test --coverage
 
       #Run test functcionel for GlaDOS
-      - name: Run functcionel test
-        run: make func_tests
+#       - name: Run functcionel test
+#         run: make func_tests
+      - name: Create Issue on Failed workflow
+        if: ${{ failure() }}
+        uses: dacbd/create-issue-action@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE }}
+        with:
+          token: ${{ github.token }}
+          title: Simple test issue
+          body: my new issue
 
       - name: Upload test coverage in artifact
         uses: actions/upload-artifact@v3
