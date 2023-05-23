@@ -32,10 +32,11 @@ jobs:
       
 #       - name: Generate package.yaml
 #         run: cabal init --overwrite --package-name your-package-name --license MIT --author "Your Name" --email "your.email@example.com"
-    
-      
       - name: Compile Project
-        run: make build
+        run: ghc main.hs    
+      
+#       - name: Compile Project
+#         run: make build
         
 #       - name: Setup GHC
 #         run: stack setup
