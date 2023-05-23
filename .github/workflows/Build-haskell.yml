@@ -16,23 +16,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Setup Haskell
-        uses: actions/setup-haskell@v1
+      - name: Setup Stack
+        uses: fpco/setup-stack@v2
         with:
-          ghc-version: 8.10.4
-          cabal-version: 3.4.0.0
+          stack-version: 2.7.3
 
       - name: Build
-        run: cabal build
+        run: stack build --system-ghc
 
       - name: Run Unit Tests
-        run: cabal test --enable-tests
-
-      - name: Install Dependencies for Functional Tests
-        run: cabal install --only-dependencies --enable-tests
+        run: stack test --system-ghc
 
       - name: Run Functional Tests
-        run: cabal test --test-show-details=streaming --test-option=--color=always --enable-tests
+        run: stack test --system-ghc --test-arguments="--color always"
 
 
 
