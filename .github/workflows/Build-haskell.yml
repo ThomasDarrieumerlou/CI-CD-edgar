@@ -30,8 +30,11 @@ jobs:
           stack-version: 'latest'
       
       # Run command for building project
-      - name: Compile project GlaDOS
+      - name: Compile project
         run: stack build
+        
+      - name: Setup
+        run: stack setup
 
 #       - name: Upload artifacts
 #         uses: actions/upload-artifact@v3
@@ -53,7 +56,7 @@ jobs:
       - name: Run test haskell with stack
         run: stack test --coverage
 
-      #Run test functcionel for GlaDOS
+      #Run test functcionel for
 #       - name: Run functcionel test
 #         run: make func_tests
       - name: Create Issue on Failed workflow
